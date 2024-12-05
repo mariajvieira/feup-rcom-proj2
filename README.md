@@ -3,7 +3,8 @@
 ## PART 2
 
 - em cada TUX: ```systemctl restart networking```   (ou reiniciar todos os tuxs)
-- gtk : /system reset-configuration
+- gtk : ```/system reset-configuration```
+  
 ### EXP 1
 
 ![image](https://github.com/user-attachments/assets/8508334f-cea8-42a6-9152-7f54292e4341)
