@@ -169,9 +169,34 @@ Configurar router no GTK:
 
 ### Step2:
 Verificar rotas: ```route -n```
-- TUX3: 
+– tuxY4 as default router of tuxY3;
+– RC as default router for tuxY2 and tuxY4
+– in tuxY2 and RC add routes for 172.16.Y0.0/24
+
+### Step3:
+TUX3:
+- ping 172.16.71.1 (tux2)
+- ping 172.16.70.254 (tux4)
+- ping 172.16.71.254 (router)
+
+### Step4:
+TUX2:
 
 
+- ```sysctl net.ipv4.conf.eth1.accept_redirects=0```
+- ```sysctl net.ipv4.conf.all.accept_redirects=0```
+-
+- remover rota direta para o tux3 pelo tux4: ```route del -net 172.16.70.0/24 gw 172.16.71.253```
+- ping 172.16.70.1 (tux3)  -> agora a rota vai pelo router
+- 
+- ```traceroute 172.16.70.1```(tux3)  : tem 3 entradas porque vai pelo router
+- voltar a adicionar rota direta para o tux3 pelo tux4:```route add -net 172.16.70.0/24 gw 172.16.71.253```
+- ```traceroute 172.16.70.1```(tux3)  : tem 2 entradas porque vai direto pelo tux4
+- 
+- ```sysctl net.ipv4.conf.eth1.accept_redirects=1```
+- remover rota direta para o tux3 pelo tux4: ```route del -net 172.16.70.0/24 gw 172.16.71.253```
+- ```traceroute 172.16.70.1```(tux3)  : 3 entradas novamente porque vai por default pelo router quando nao ha tux4
+  
 
 
 
