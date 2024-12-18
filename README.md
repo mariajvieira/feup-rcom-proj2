@@ -348,6 +348,22 @@ TUX2:
 
 
 
+## APONTAMENTOS DOS COMANDOS
+
+![image](https://github.com/user-attachments/assets/af9eb78c-f808-4bba-ac17-ff66f1847722)
+
+![image](https://github.com/user-attachments/assets/6a19bd11-1c63-4982-bd8a-2aabdcde4ff5)
+
+![image](https://github.com/user-attachments/assets/941f365f-6247-4174-acd4-353e029e2f5b)
+
+![image](https://github.com/user-attachments/assets/c69c39c2-0a26-43ce-858d-72fdf08fe3bb)
+
+![image](https://github.com/user-attachments/assets/4ed56731-8397-4f55-8348-1d55dbdaa69d)
+
+![image](https://github.com/user-attachments/assets/ccb494dc-286f-4ac1-974c-095633f33365)
+
+![image](https://github.com/user-attachments/assets/08b069dc-e073-49c9-b8de-c37d4709e870)
+
 
 
 
