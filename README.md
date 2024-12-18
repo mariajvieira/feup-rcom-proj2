@@ -10,7 +10,151 @@
 
 
 ## PART 1
-...
+
+**EXPLICAÇÃO DO CÓDIGO**
+
+Este código em C implementa um cliente FTP (File Transfer Protocol) que permite baixar um arquivo de um servidor FTP, utilizando o modo passivo (PASV). Abaixo, explico cada parte em detalhes:
+- Função handle_error
+void handle_error(const char *message) {
+    perror(message);
+    exit(EXIT_FAILURE);
+}
+Imprime uma mensagem de erro e encerra o programa com código de erro.
+Usada para simplificar o tratamento de erros ao longo do código.
+
+
+- Função extract_pasv_info
+void extract_pasv_info(const char *response, char *ip, int *port) {
+    int a, b, c, d, p1, p2;
+    if (sscanf(response, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d)", &a, &b, &c, &d, &p1, &p2) == 6) {
+        sprintf(ip, "%d.%d.%d.%d", a, b, c, d);
+        *port = p1 * 256 + p2;
+    } else {
+        fprintf(stderr, "Invalid PASV response format.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+Extrai o endereço IP e a porta do modo passivo a partir da resposta do servidor (227 Entering Passive Mode).
+A resposta contém o IP e a porta no formato (a,b,c,d,p1,p2). A porta é calculada como p1 * 256 + p2.
+
+
+- Função parse_ftp_url
+void parse_ftp_url(const char *url, char *host, char *user, char *pass, char *path) {
+    if (sscanf(url, "ftp://%99[^:]:%99[^@]@%99[^/]/%s", user, pass, host, path) == 4) return;
+    if (sscanf(url, "ftp://anonymous@%99[^/]/%s", host, path) == 2) {
+        strcpy(user, "anonymous");
+        strcpy(pass, "anonymous");
+        return;
+    }
+    if (sscanf(url, "ftp://%99[^/]/%s", host, path) == 2) {
+        strcpy(user, "anonymous");
+        strcpy(pass, "anonymous");
+        return;
+    }
+    fprintf(stderr, "URL format error\n");
+    exit(EXIT_FAILURE);
+}
+Analisa uma URL FTP e extrai:
+Host: Nome ou endereço do servidor.
+User: Nome de usuário.
+Pass: Senha.
+Path: Caminho do arquivo.
+Suporta URLs com:
+Usuário e senha explícitos (ftp://user:pass@host/path).
+Usuário anônimo (ftp://anonymous@host/path).
+Apenas host e caminho (ftp://host/path).
+
+
+- Função connect_to_ftp_server
+int connect_to_ftp_server(const char *hostname) {
+    struct hostent *server;
+    struct sockaddr_in server_addr;
+    int sockfd;
+
+    if ((server = gethostbyname(hostname)) == NULL) {
+        herror("gethostbyname");
+        exit(EXIT_FAILURE);
+    }
+
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        handle_error("socket");
+    }
+
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(FTP_PORT);
+    memcpy(&server_addr.sin_addr.s_addr, server->h_addr, server->h_length);
+
+    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        handle_error("connect");
+    }
+
+    return sockfd;
+}
+Conecta-se ao servidor FTP na porta 21.
+Usa gethostbyname para resolver o nome do host em um endereço IP.
+Cria um socket para a comunicação de controle e estabelece a conexão.
+
+
+
+- Funções para Comandos e Respostas
+void send_ftp_command(int sockfd, const char *command, const char *param) {
+    char buffer[BUFFER_SIZE];
+    snprintf(buffer, sizeof(buffer), "%s %s\r\n", command, param ? param : "");
+    if (write(sockfd, buffer, strlen(buffer)) < 0) {
+        handle_error("write");
+    }
+}
+
+void read_ftp_response(int sockfd, char *buffer) {
+    ssize_t bytes_read = read(sockfd, buffer, BUFFER_SIZE - 1);
+    if (bytes_read < 0) {
+        handle_error("read");
+    }
+    buffer[bytes_read] = '\0';
+}
+send_ftp_command: Envia comandos FTP ao servidor.
+read_ftp_response: Lê as respostas do servidor e armazena no buffer.
+
+
+
+- Função Principal
+int main(int argc, char *argv[]) {
+Resumo do Fluxo:
+Parse da URL FTP:
+
+Extrai host, usuário, senha e caminho do arquivo.
+Conexão ao Servidor de Controle:
+
+Estabelece comunicação com o servidor FTP na porta 21.
+Lê a mensagem inicial do servidor.
+Autenticação:
+
+Envia os comandos USER e PASS com o nome de usuário e senha.
+Modo Passivo:
+
+Entra no modo passivo (PASV) para abrir uma nova conexão de dados.
+Extrai o IP e a porta.
+Conexão de Dados:
+
+Conecta-se ao socket de dados no IP/porta obtidos.
+Baixa o Arquivo:
+
+Envia o comando RETR para iniciar o download.
+Lê os dados do socket e salva no arquivo local.
+Finalização:
+
+Fecha os sockets e encerra o programa.
+
+
+
+- Exemplo de Uso
+./ftp_client ftp://user:password@ftp.example.com/path/to/file.txt
+Conecta ao servidor ftp.example.com como user com a senha password.
+Baixa o arquivo file.txt do diretório /path/to/.
+
+
+
 
 
 ## PART 2
