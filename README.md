@@ -366,53 +366,74 @@ TUX2:
 
 
 
+## COMANDOS RESUMIDOS
 
+1)
+- TUX 3
+GtkTerm - configuration - port - baud rate - 115200 - enter
+systemctl restart networking ou reiniciar os pcs
+TUX3: ifconfig eth1 up, ifconfig eth1 172.16.Y0.1/24
+TUX4: ifconfig eth1 up, ifconfig eth1 172.16.Y0.254/24
 
-## EXPLICAÇÃO DO NAT E DO DNS
+3)
+- No TUX 2
+> ifconfig eth1 up
+> ifconfig eth1ifconfig eth0 172.16.Y1.1/24
+> /interface bridge add name=bridgeY0
+> /interface bridge add name=bridgeY1
+> /interface bridge port remove [find interface=ether2] 
+> /interface bridge port remove [find interface=ether3] 
+> /interface bridge port remove [find interface=ether4] 
+> /interface bridge port add bridge=bridgeY0 interface=ether3
+> /interface bridge port add bridge=bridgeY0 interface=ether4
+> /interface bridge port add bridge=bridgeY1 interface=ether2
 
-- **O que é o NAT e o que acontece se for desativado?**
-- O que faz o NAT?
-- O NAT (Network Address Translation) traduz endereços IP privados utilizados dentro de uma rede local (LAN) em um único endereço IP público usado para comunicação externa, como na internet. Ele é normalmente implementado em roteadores e firewalls.
+3)
+- Cabos: eth2 do TUX 4 à porta (10) do switch
+- No TUX 4
+> ifconfig eth2 up
+> ifconfig eth2 172.16.Y1.253/24
+> /interface bridge port remove [find interface=ether10]
+>  /interface bridge port add bridge=bridgeY1 interface=ether10
+- TUX 3: route add -net 172.16.Y1.0/24 gw 172.16.Y0.254
+- TUX 2: route add -net 172.16.Y0.0/24 gw 172.16.Y1.253
 
+4)
+- Cabos:
+ .12 (do de cima) ao eth1 do router
+switch (9) ao eth2 do router
+  >  /interface bridge port remove [find interface=ether9]
+  >  /interface bridge port add bridge=bridgeY1 interface=ether9
+  > 
+Cabos: t4 ao router MT 
+> /ip address add address=172.16.61.254/24 interface=ether2
+> /ip address add address=172.16.1.61/24 interface=ether1
+- TUX 3: route add -net 172.16.1.0/24 gw 172.16.60.254
+- TUX 4: route add -net 172.16.1.0/24 gw 172.16.61.254
+- TUX 2: route add -net 172.16.1.0/24 gw 172.16.61.254
+> ping 172.16.1.10
+> /ip route add dst-address=172.16.60.0/24 gateway=172.16.61.253
+- TUX 2: 
+> sysctl net.ipv4.conf.eth1.accept_redirects=0 
+> sysctl net.ipv4.conf.all.accept_redirects=0 
+> route del -net 172.16.60.0/24 gw 172.16.61.253
+> ping 172.16.60.1 (nao funciona antes do add)
+> route add -net 172.16.60.0/24 gw 172.16.61.254
+> ping 172.16.60.1
+> traceroute 172.16.60.1
+> route del -net 172.16.60.0/24 gw 172.16.61.254
+> route add -net 172.16.60.0/24 gw 172.16.61.253
+> traceroute 172.16.60.1
+> sysctl net.ipv4.conf.eth1.accept_redirects=1 
+> sysctl net.ipv4.conf.all.accept_redirects=1
+> /ip firewall nat disable 0
+- TUX 3 : ping 172.16.1.10 (nao funciona mas nao temos a certeza)
+> / ip firewall nat enable 0
+- TUX 3 : ping 172.16.1.10 
 
-- Principais funções do NAT:
-- Compartilhamento de IP público: Permite que vários dispositivos em uma LAN acessem a internet usando um único IP público.
-- Economia de endereços IPv4: Reduz a necessidade de atribuir múltiplos endereços IPv4 públicos.
-- Segurança básica: Dispositivos internos são "escondidos" da internet, tornando mais difícil para atacantes acessá-los diretamente.
-
-- O que acontece se o NAT for desativado?
-Perda de acesso à internet: Dispositivos com IP privado (como 192.168.x.x) não poderão acessar a internet, pois seus pacotes não serão traduzidos para um IP público roteável.
-Exposição à internet: Se os dispositivos tiverem IPs públicos, eles ficarão acessíveis diretamente, aumentando o risco de ataques.
-Necessidade de IPs públicos: Cada dispositivo na rede precisaria de um IP público único, o que é caro e pouco viável em redes domésticas ou pequenas empresas.
-Desafios de roteamento: Seria necessário configurar roteamento avançado para permitir comunicação externa.
-
-
-
-- **O que é o DNS e o que acontece se for desativado?**
-- O que faz o DNS?
-- O DNS (Domain Name System) é um serviço que traduz nomes de domínio legíveis por humanos (como www.google.com) em endereços IP (como 142.250.74.206), permitindo que navegadores e dispositivos se conectem a servidores.
-
-- Principais funções do DNS:
-- Resolução de nomes: Converte nomes de domínio em IPs.
-- Facilita a navegação: Evita a necessidade de memorizar endereços IP.
-- Redundância: DNS é hierárquico, garantindo disponibilidade mesmo em caso de falhas.
-
-  
-- **O que acontece se o DNS for desativado?**
-- Dificuldade de acesso à internet: Sem o DNS, usuários precisariam digitar endereços IP diretamente, o que é pouco prático e inviável para a maioria dos sites.
-- Serviços baseados em nome param de funcionar: Aplicações que dependem de nomes de domínio, como navegadores, falharão.
-- Resolução manual necessária: Administradores teriam que mapear nomes para IPs manualmente (por exemplo, usando o arquivo /etc/hosts no Linux).
-
-
-
-- **Comparação entre NAT e DNS**
-- NAT: Focado na tradução de endereços IP entre redes internas e externas.
-- DNS: Focado em traduzir nomes de domínio em endereços IP.
-- Ambos são essenciais para a conectividade moderna e, quando desativados, afetam severamente a usabilidade e funcionalidade da rede.
-
-
-
-
+5)
+EM TODOS OS TUXs: nano /etc/resolv.conf
+adicionar, se não estiver já: nameserver 10.227.20.3
 
 
 
