@@ -378,22 +378,34 @@ TUX4: ifconfig eth1 up, ifconfig eth1 172.16.Y0.254/24
 3)
 - No TUX 2
 > ifconfig eth1 up
+> 
 > ifconfig eth1ifconfig eth0 172.16.Y1.1/24
+> 
 > /interface bridge add name=bridgeY0
+> 
 > /interface bridge add name=bridgeY1
-> /interface bridge port remove [find interface=ether2] 
-> /interface bridge port remove [find interface=ether3] 
-> /interface bridge port remove [find interface=ether4] 
+> 
+> /interface bridge port remove [find interface=ether2]
+> 
+> /interface bridge port remove [find interface=ether3]
+> 
+> /interface bridge port remove [find interface=ether4]
+> 
 > /interface bridge port add bridge=bridgeY0 interface=ether3
+> 
 > /interface bridge port add bridge=bridgeY0 interface=ether4
+> 
 > /interface bridge port add bridge=bridgeY1 interface=ether2
 
 3)
 - Cabos: eth2 do TUX 4 à porta (10) do switch
 - No TUX 4
 > ifconfig eth2 up
+> 
 > ifconfig eth2 172.16.Y1.253/24
+> 
 > /interface bridge port remove [find interface=ether10]
+> 
 >  /interface bridge port add bridge=bridgeY1 interface=ether10
 - TUX 3: route add -net 172.16.Y1.0/24 gw 172.16.Y0.254
 - TUX 2: route add -net 172.16.Y0.0/24 gw 172.16.Y1.253
@@ -403,30 +415,48 @@ TUX4: ifconfig eth1 up, ifconfig eth1 172.16.Y0.254/24
  .12 (do de cima) ao eth1 do router
 switch (9) ao eth2 do router
   >  /interface bridge port remove [find interface=ether9]
+  > 
   >  /interface bridge port add bridge=bridgeY1 interface=ether9
   > 
 Cabos: t4 ao router MT 
 > /ip address add address=172.16.61.254/24 interface=ether2
+> 
 > /ip address add address=172.16.1.61/24 interface=ether1
+> 
 - TUX 3: route add -net 172.16.1.0/24 gw 172.16.60.254
 - TUX 4: route add -net 172.16.1.0/24 gw 172.16.61.254
 - TUX 2: route add -net 172.16.1.0/24 gw 172.16.61.254
 > ping 172.16.1.10
+> 
 > /ip route add dst-address=172.16.60.0/24 gateway=172.16.61.253
+> 
 - TUX 2: 
-> sysctl net.ipv4.conf.eth1.accept_redirects=0 
-> sysctl net.ipv4.conf.all.accept_redirects=0 
+> sysctl net.ipv4.conf.eth1.accept_redirects=0
+> 
+> sysctl net.ipv4.conf.all.accept_redirects=0
+> 
 > route del -net 172.16.60.0/24 gw 172.16.61.253
+> 
 > ping 172.16.60.1 (nao funciona antes do add)
+> 
 > route add -net 172.16.60.0/24 gw 172.16.61.254
+> 
 > ping 172.16.60.1
+> 
 > traceroute 172.16.60.1
+> 
 > route del -net 172.16.60.0/24 gw 172.16.61.254
+> 
 > route add -net 172.16.60.0/24 gw 172.16.61.253
+> 
 > traceroute 172.16.60.1
-> sysctl net.ipv4.conf.eth1.accept_redirects=1 
+> 
+> sysctl net.ipv4.conf.eth1.accept_redirects=1
+> 
 > sysctl net.ipv4.conf.all.accept_redirects=1
+> 
 > /ip firewall nat disable 0
+> 
 - TUX 3 : ping 172.16.1.10 (nao funciona mas nao temos a certeza)
 > / ip firewall nat enable 0
 - TUX 3 : ping 172.16.1.10 
