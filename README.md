@@ -12,7 +12,7 @@
 
 ## Part 2 - Configuration and Study of a Network
 
-[Link to report](https://github.com/mariajvieira/feup-rcom-proj2/RC2_Report.pdf)
+[Link to report](RC2_Report.pdf)
 
 
 
